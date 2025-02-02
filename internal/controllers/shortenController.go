@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"ssorc3/verkurzen/internal/config"
 	"ssorc3/verkurzen/internal/data"
 	"ssorc3/verkurzen/internal/generate"
 
@@ -11,12 +12,14 @@ import (
 )
 
 type ShortenController struct {
+    config *config.Config
     repo data.ShortenRepo
     logger *log.Logger
 }
 
-func NewShortenController(repo data.ShortenRepo, logger *log.Logger) ShortenController {
+func NewShortenController(config *config.Config, repo data.ShortenRepo, logger *log.Logger) ShortenController {
     return ShortenController{
+        config: config,
         repo: repo,
         logger: logger,
     }
@@ -53,7 +56,7 @@ func (controller ShortenController) handlePost(c *gin.Context) {
 
     c.JSON(http.StatusOK, gin.H{
         "linkId": linkId,
-        "link": fmt.Sprintf("http://localhost:8081/%s", linkId),
+        "link": fmt.Sprintf("http://%s/%s", controller.config.BaseUrl, linkId),
     })
 }
 
