@@ -1,38 +1,37 @@
 package config
 
 import (
-	"fmt"
-	"io"
+	"encoding/json"
+	"log"
 
-	"gopkg.in/yaml.v3"
+	"github.com/spf13/viper"
 )
 
-type DatabaseConfig struct {
-        ConnectionString string `yaml:"connectionString"`
-    }
+var viperInstance = viper.New()
+var Default Config
 
 type Config struct {
-    AllowedOrigins []string `yaml:"allowedOrigins"`
-    BaseUrl string `yaml:"baseUrl"`
-    Database DatabaseConfig `yaml:"database"`
+    Server struct {
+        Port uint
+        Host string
+    }
+    Database struct {
+        URL string
+    }
 }
 
-func LoadConfig(reader io.Reader) (*Config, error) {
-    config := &Config{
-        AllowedOrigins: []string{"localhost"},
-        BaseUrl: "localhost:8081",
-        Database: DatabaseConfig{ ConnectionString: "localhost", },
-    }
+func (d Config) String() string {
+    b, _ := json.Marshal(d)
+    return string(b)
+}
 
-    b, err := io.ReadAll(reader)
-    if err != nil {
-        return nil, fmt.Errorf("Failed to read config: %w", err)
+func Parse() Config {
+    if err := viperInstance.Unmarshal(&Default); err != nil {
+        log.Fatal("Failed to read configuration", err)
     }
+    return Default
+}
 
-    err = yaml.Unmarshal(b, config)
-    if err != nil {
-        return nil, err
-    }
-
-    return config, nil
+func Viper() *viper.Viper {
+    return viperInstance
 }

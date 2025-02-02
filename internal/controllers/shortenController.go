@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"ssorc3/verkurzen/internal/config"
 	"ssorc3/verkurzen/internal/data"
@@ -12,19 +11,18 @@ import (
 )
 
 type ShortenController struct {
-    config *config.Config
     repo data.ShortenRepo
-    logger *log.Logger
 }
 
-func NewShortenController(config *config.Config, repo data.ShortenRepo, logger *log.Logger) ShortenController {
+func NewShortenController(repo data.ShortenRepo) ShortenController {
     return ShortenController{
-        config: config,
         repo: repo,
-        logger: logger,
     }
 }
 
+// @Param linkId string
+// @Success 307
+// @Router /:linkId [get]
 func (controller ShortenController) handleGet(c *gin.Context) {
     linkId := c.Param("linkId")
 
@@ -56,11 +54,11 @@ func (controller ShortenController) handlePost(c *gin.Context) {
 
     c.JSON(http.StatusOK, gin.H{
         "linkId": linkId,
-        "link": fmt.Sprintf("http://%s/%s", controller.config.BaseUrl, linkId),
+        "link": fmt.Sprintf("http://%s:%d/%s", config.Default.Server.Host, config.Default.Server.Port, linkId),
     })
 }
 
-func (c ShortenController) RegisterRoutes(router *gin.Engine) {
+func (c ShortenController) RegisterRoutes(router *gin.RouterGroup) {
     router.GET("/:linkId", c.handleGet)
     router.POST("/", c.handlePost)
 }
