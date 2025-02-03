@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"ssorc3/verkurzen/docs"
 	"ssorc3/verkurzen/internal/config"
 	"ssorc3/verkurzen/internal/controllers"
 	"ssorc3/verkurzen/internal/data"
@@ -12,6 +13,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gocql/gocql"
 	"github.com/spf13/cobra"
+
+    swagger "github.com/swaggo/gin-swagger"
+    swaggerFiles "github.com/swaggo/files"
 )
 
 var (
@@ -65,9 +69,21 @@ func startServer(cmd *cobra.Command, args []string) {
         pprof.Register(router, "monitor/pprof")
     }
     rootRouter := router.Group("/")
+    rootRouter.GET("/doc/*any", swagger.WrapHandler(swaggerFiles.Handler))
+
     shortenRepo := data.NewShortenRepo(session)
     shortenController := controllers.NewShortenController(shortenRepo)
     shortenController.RegisterRoutes(rootRouter)
 
     router.Run(fmt.Sprintf("%s:%d", config.Default.Server.Host, config.Default.Server.Port))
+}
+
+func setupDoc() {
+	// programmatically set swagger info
+	docs.SwaggerInfo.Title = "Verkürzen"
+	docs.SwaggerInfo.Description = "Basic URL shortener"
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", config.Default.Server.Host, config.Default.Server.Port)
+	docs.SwaggerInfo.BasePath = "/"
+	docs.SwaggerInfo.Schemes = []string{"http"}
 }

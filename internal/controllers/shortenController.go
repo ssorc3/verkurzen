@@ -20,8 +20,8 @@ func NewShortenController(repo data.ShortenRepo) ShortenController {
     }
 }
 
-// @Param linkId string
-// @Success 307
+// @Param linkId query string true "Id of the link to redirect to"
+// @Success 307   "Redirects to the specified link"
 // @Router /:linkId [get]
 func (controller ShortenController) handleGet(c *gin.Context) {
     linkId := c.Param("linkId")
@@ -38,6 +38,14 @@ type shortenUrlBody struct {
     FullUrl string `json:"fullUrl"`
 }
 
+type shortenUrlResponse struct {
+    LinkId string `json:"linkId"`
+    Link string `json:"link"`
+}
+
+// @Param request body controllers.shortenUrlBody true "Expected body"
+// @Success 200 {object} controllers.shortenUrlResponse
+// @Router / [post]
 func (controller ShortenController) handlePost(c *gin.Context) {
     var body shortenUrlBody
     err := c.ShouldBindJSON(&body)
@@ -52,9 +60,9 @@ func (controller ShortenController) handlePost(c *gin.Context) {
         c.Error(err)
     }
 
-    c.JSON(http.StatusOK, gin.H{
-        "linkId": linkId,
-        "link": fmt.Sprintf("http://%s:%d/%s", config.Default.Server.Host, config.Default.Server.Port, linkId),
+    c.JSON(http.StatusOK, shortenUrlResponse{
+        LinkId: linkId,
+        Link: fmt.Sprintf("http://%s:%d/%s", config.Default.Server.Host, config.Default.Server.Port, linkId),
     })
 }
 

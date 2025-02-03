@@ -1,0 +1,70 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/": {
+            "post": {
+                "parameters": [
+                    {
+                        "description": "Expected body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.shortenUrlBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.shortenUrlResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/:linkId": {
+            "get": {
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id of the link to redirect to",
+                        "name": "linkId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "307": {
+                        "description": "Redirects to the specified link"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controllers.shortenUrlBody": {
+            "type": "object",
+            "properties": {
+                "fullUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.shortenUrlResponse": {
+            "type": "object",
+            "properties": {
+                "link": {
+                    "type": "string"
+                },
+                "linkId": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,42 @@
+definitions:
+  controllers.shortenUrlBody:
+    properties:
+      fullUrl:
+        type: string
+    type: object
+  controllers.shortenUrlResponse:
+    properties:
+      link:
+        type: string
+      linkId:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /:
+    post:
+      parameters:
+      - description: Expected body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.shortenUrlBody'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.shortenUrlResponse'
+  /:linkId:
+    get:
+      parameters:
+      - description: Id of the link to redirect to
+        in: query
+        name: linkId
+        required: true
+        type: string
+      responses:
+        "307":
+          description: Redirects to the specified link
+swagger: "2.0"
