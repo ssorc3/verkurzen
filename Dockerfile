@@ -1,14 +1,22 @@
-FROM golang:1.23-bookworm
+FROM golang:1.23-bookworm AS build
 
 WORKDIR /app
 
-COPY . .
-
+COPY go.mod go.sum ./
 RUN go mod download
 
-RUN go build -o /bin/server ./cmd/server
+COPY . .
 
-FROM scratch
+RUN CGO_ENABLED=0 GOOS=linux go build -o server ./cmd/server
 
-COPY --from=0 /bin/server /bin/server
-CMD ["/bin/server" "start"]
+FROM alpine:edge
+
+WORKDIR /app
+
+COPY --from=build /app/server .
+COPY ./config ./config
+
+RUN apk --no-cache add ca-certificates tzdata
+
+EXPOSE 5000
+ENTRYPOINT ["/app/server", "start"]
