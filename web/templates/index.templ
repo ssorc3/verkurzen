@@ -1,0 +1,26 @@
+{{ block "index" . }}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://unpkg.com/htmx.org@2.0.4"
+        integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" src="static/index.css">
+    </link>
+</head>
+
+<body>
+    <h1>Verkürzen</h1>
+    <form id="shorten-form" hx-post="/shorten">
+        <input name="url" type="text"/>
+        <button type="submit">Shorten</button>
+    </form>
+</body>
+
+</html>
+{{ end }}
+
+{{ block "shortenedLink" . }}
+<p>Here's your link: <a href="{{.Link}}">{{.Link}}</a></p>
+{{ end }}

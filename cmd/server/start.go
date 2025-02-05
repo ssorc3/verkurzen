@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"ssorc3/verkurzen/docs"
 	"ssorc3/verkurzen/internal/config"
 	"ssorc3/verkurzen/internal/controllers"
 	"ssorc3/verkurzen/internal/data"
 	"ssorc3/verkurzen/internal/log"
+	"ssorc3/verkurzen/internal/services"
 	"strings"
 
 	"github.com/gin-contrib/pprof"
@@ -14,8 +16,8 @@ import (
 	"github.com/gocql/gocql"
 	"github.com/spf13/cobra"
 
-    swagger "github.com/swaggo/gin-swagger"
-    swaggerFiles "github.com/swaggo/files"
+	swaggerFiles "github.com/swaggo/files"
+	swagger "github.com/swaggo/gin-swagger"
 )
 
 var (
@@ -71,9 +73,16 @@ func startServer(cmd *cobra.Command, args []string) {
     rootRouter := router.Group("/")
     rootRouter.GET("/doc/*any", swagger.WrapHandler(swaggerFiles.Handler))
 
+    rootRouter.StaticFS("/static", http.Dir("web/static"))
+    router.LoadHTMLGlob("web/templates/*")
+
     shortenRepo := data.NewShortenRepo(session)
-    shortenController := controllers.NewShortenController(shortenRepo)
+    shortenService := services.NewShortenService(shortenRepo)
+    shortenController := controllers.NewShortenController(shortenService)
     shortenController.RegisterRoutes(rootRouter)
+
+    uiController := controllers.NewUIController(shortenService)
+    uiController.RegisterRoutes(rootRouter)
 
     router.Run(fmt.Sprintf("%s:%d", config.Default.Server.Host, config.Default.Server.Port))
 }

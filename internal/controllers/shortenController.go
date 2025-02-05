@@ -4,19 +4,18 @@ import (
 	"fmt"
 	"net/http"
 	"ssorc3/verkurzen/internal/config"
-	"ssorc3/verkurzen/internal/data"
-	"ssorc3/verkurzen/internal/generate"
+	"ssorc3/verkurzen/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
 
 type ShortenController struct {
-    repo data.ShortenRepo
+    service services.ShortenService
 }
 
-func NewShortenController(repo data.ShortenRepo) ShortenController {
+func NewShortenController(service services.ShortenService) ShortenController {
     return ShortenController{
-        repo: repo,
+        service: service,
     }
 }
 
@@ -26,7 +25,7 @@ func NewShortenController(repo data.ShortenRepo) ShortenController {
 func (controller ShortenController) handleGet(c *gin.Context) {
     linkId := c.Param("linkId")
 
-    fullUrl, err := controller.repo.GetFullUrl(linkId)
+    fullUrl, err := controller.service.GetFullUrl(linkId)
     if err != nil {
         c.Status(http.StatusInternalServerError)
     }
@@ -53,8 +52,7 @@ func (controller ShortenController) handlePost(c *gin.Context) {
         c.Error(err)
     }
 
-    linkId := generate.NewLinkId()
-    err = controller.repo.StoreLink(linkId, body.FullUrl)
+    linkId, err := controller.service.StoreUrl(body.FullUrl)
 
     if err != nil {
         c.Error(err)
